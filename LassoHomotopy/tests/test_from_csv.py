@@ -1,7 +1,10 @@
 import numpy as np
 import csv
 import os
-from LassoHomotopy import LassoHomotopyModel
+import sys
+parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.insert(0, parent_dir)
+from model.LassoHomotopy import LassoHomotopyModel
 
 def load_csv(path):
     with open(path, 'r') as f:
@@ -10,7 +13,7 @@ def load_csv(path):
         data = np.array([[float(x) for x in row] for row in reader])
     return data[:, :-1], data[:, -1]
 
-csv_path = os.path.join(os.path.dirname(__file__), '..', 'tests', 'small_test.csv')
+csv_path = os.path.join(os.path.dirname(__file__), 'small_test.csv')
 
 X, y = load_csv(csv_path)
 

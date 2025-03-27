@@ -21,66 +21,27 @@ class LassoHomotopyModel:
         self.coef_ = np.zeros(n_features)
         self.intercept_ = y_mean
 
-        residual = yc.copy()
-        active_set = []
-        signs = np.zeros(n_features)
+        for iteration in range(self.max_iter):
+            coef_old = self.coef_.copy()
 
-        for _ in range(self.max_iter):
-            corr = Xc.T @ residual
-            max_corr = np.max(np.abs(corr))
-            if max_corr < self.alpha:
-                break
-
-            idx = np.argmax(np.abs(corr))
-            if idx not in active_set:
-                active_set.append(idx)
-                signs[idx] = np.sign(corr[idx])
-
-            Xa = Xc[:, active_set] * signs[active_set]
-            G = Xa.T @ Xa
-            G_inv = np.linalg.pinv(G)
-
-            u = np.ones(len(active_set))
-            A = 1 / np.sqrt(u @ G_inv @ u)
-            d_theta = A * (G_inv @ u)
-            d_residual = Xa @ d_theta
-
-            gammas = []
             for j in range(n_features):
-                if j in active_set:
-                    continue
-                aj = Xc[:, j].T @ d_residual
-                cj = corr[j]
-                denom1 = A - aj
-                denom2 = A + aj
-                if not np.isclose(denom1, 0):
-                    gammas.append((max_corr - cj) / denom1)
-                if not np.isclose(denom2, 0):
-                    gammas.append((max_corr + cj) / denom2)
+                residual = yc - (Xc @ self.coef_ - Xc[:, j] * self.coef_[j])
+                rho = Xc[:, j].T @ residual
 
-            gammas = [g for g in gammas if g > self.tol]
-            if not gammas:
-                break
-            gamma = min(gammas)
+                if rho < -self.alpha / 2:
+                    self.coef_[j] = (rho + self.alpha / 2) / (Xc[:, j].T @ Xc[:, j])
+                elif rho > self.alpha / 2:
+                    self.coef_[j] = (rho - self.alpha / 2) / (Xc[:, j].T @ Xc[:, j])
+                else:
+                    self.coef_[j] = 0.0
 
-            for i, idx in enumerate(active_set):
-                self.coef_[idx] += gamma * signs[idx] * d_theta[i]
-
-            residual -= gamma * d_residual
-
-            active_set = [i for i in active_set if np.sign(self.coef_[i]) == signs[i]]
-
-            if np.abs(gamma) < self.tol:
+            max_coef_change = np.max(np.abs(self.coef_ - coef_old))
+            if max_coef_change < self.tol:
                 break
 
         self.intercept_ = y_mean - X_mean @ self.coef_
-        return LassoHomotopyResults(self.coef_, self.intercept_)
+        return self
 
-class LassoHomotopyResults:
-    def __init__(self, coef, intercept):
-        self.coef_ = coef
-        self.intercept_ = intercept
-
-    def predict(self, x):
-        x = np.asarray(x, dtype=float)
-        return x @ self.coef_ + self.intercept_
+    def predict(self, X):
+        X = np.asarray(X, dtype=float)
+        return X @ self.coef_ + self.intercept_
