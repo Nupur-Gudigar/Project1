@@ -128,7 +128,7 @@ def test_alpha_zero_OLS():
     ols_coefs = ols_solution[:-1]   # first part is the slope
     ols_intercept = ols_solution[-1]  # last part is the intercept
 
-    # Check they're close
+    # Checking they're close
     # Adjust tolerances as appropriate
     assert np.allclose(lasso_coefs, ols_coefs, atol=1e-2), (
         "Coefficients from alpha=0 Lasso should match OLS"
