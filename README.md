@@ -329,9 +329,9 @@ This project was completed as part of **CS 584 – Machine Learning** coursework
 | Name              | A-Number     | Email                          |
 |-------------------|--------------|--------------------------------|
 | Nupur Gudigar     | A20549865     | ngudigar@hawk.iit.edu          |
-| Zaigham Shaikh    |      | zshaikh4@hawk.iit.edu          |
-| Nehil Joshi       |      | njoshi20@hawk.iit.edu           |
-| Riddhi Das        |      | rdas8@hawk.iit.edu             |
+| Zaigham Shaikh    | A20554429     | zshaikh4@hawk.iit.edu          |
+| Nehil Joshi       | A20554381     | njoshi20@hawk.iit.edu           |
+| Riddhi Das        | A20582829     | rdas8@hawk.iit.edu             |
 
 
 
