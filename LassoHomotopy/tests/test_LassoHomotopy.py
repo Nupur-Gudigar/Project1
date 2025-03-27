@@ -3,6 +3,8 @@ import pandas as pd
 import pytest
 import sys
 import os
+import csv
+
 
 # Add project root to sys.path to access model
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
