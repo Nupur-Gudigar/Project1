@@ -118,7 +118,7 @@ class LassoHomotopyModel:
         # === Restore unscaled coefficients ===
         coef_scaled = theta / self.X_std_
 
-        # === Debias: OLS refit on non-zero coefficients ===
+        # OLS refit on non-zero coefficients ===
         active_idx = np.where(np.abs(coef_scaled) > 1e-4)[0]
         if len(active_idx) > 0:
             X_active = X[:, active_idx]
