@@ -98,6 +98,30 @@ pip install -r requirements.txt
 
 ## Running the Model & Visualizations
 
+### Usage Example
+```bash
+from model.LassoHomotopy import LassoHomotopyModel
+import numpy as np
+
+# Generate some data
+X = np.random.randn(100, 10)
+true_coef = np.array([3.0, 0.0, 0.0, 5.0, 0.0, 0.0, 0.0, 0.0, -2.0, 0.0])
+y = X @ true_coef + np.random.randn(100) * 0.1
+
+# Fit Lasso model
+model = LassoHomotopyModel()
+model.fit(X, y)
+
+# Predicts
+y_pred = model.predict(X)
+print("Coefficients:", model.coef_)
+print("Intercept:", model.intercept_)
+```
+- These Coefficients should be very close to the given original true_coef.
+- The small non-zero values near zero are due to the small noise added to y and because of the regularization encouraging sparsity.
+- Coefficients which are exactly zero show that Lasso implementation eliminates features, as expected.
+- Intercept represents how the Lasso model fits it as part of the bias term. Expect Small deviation because y includes a small noise component.
+
 ### To explore how the coefficients evolve:
 
 ```bash
@@ -329,9 +353,9 @@ This project was completed as part of **CS 584 – Machine Learning** coursework
 | Name              | A-Number     | Email                          |
 |-------------------|--------------|--------------------------------|
 | Nupur Gudigar     | A20549865     | ngudigar@hawk.iit.edu          |
-| Zaigham Shaikh    |      | zshaikh4@hawk.iit.edu          |
+| Zaigham Shaikh    | A20554429     | zshaikh4@hawk.iit.edu          |
 | Nehil Joshi       | A20554381     | njoshi20@hawk.iit.edu           |
-| Riddhi Das        |      | rdas8@hawk.iit.edu             |
+| Riddhi Das        | A20582829     | rdas8@hawk.iit.edu             |
 
 
 
