@@ -38,7 +38,7 @@ This notebook shows a plot of the coefficient paths (the “Lasso path”) and h
 3. Known collinear pair test (feature elimination)
 4. Alpha = 0 → behaves like OLS
 
-
+## Q&A
 * What does the model you have implemented do and when should it be used?
 Ans. The Lasso Homotopy model estimates a sparse linear regression model. It is useful when there are many features, and you expect only a few to be important (i.e., the true model is sparse), especially in high-dimensional or collinear data.
 
@@ -63,7 +63,7 @@ Ans. 1. Perfectly collinear features may lead to matrix inversion
 4. LassoHomotopy_Visualization.ipynb — optional visual notebook
 5. requirements.txt — dependencies
 
-
+## Team Members
 Group Member1: Nupur Gudigar
 Group Member2: Nehil Joshi
 Group Member3: Riddhi Das
