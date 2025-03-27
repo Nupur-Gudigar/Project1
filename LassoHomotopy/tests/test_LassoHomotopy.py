@@ -54,3 +54,94 @@ def test_collinear_sparsity():
 
     nonzero_count = np.sum(np.abs(model.coef_) > 1e-4)
     assert nonzero_count < X.shape[1], f"Expected sparsity, got {nonzero_count} non-zero coefficients"
+
+# === Test Higly collinear dataset zeros out atleast one column ===
+def test_collinear_csv():
+    """
+    Checks that in a CSV with collinear or nearly-collinear columns,
+    Lasso will zero out (or nearly zero) at least one column's coefficient
+    when alpha is moderate.
+    """
+    def load_csv(path):
+        with open(path, 'r') as f:
+            reader = csv.reader(f)
+            header = next(reader) 
+            data = np.array([[float(x) for x in row] for row in reader])
+        return data[:, :-1], data[:, -1]
+    csv_path = os.path.join(os.path.dirname(__file__), '..', 'tests', 'collinear_data.csv')
+    X, y = load_csv(csv_path)
+    
+    alpha_val = 0.5
+    model = LassoHomotopyModel(alpha_val)
+    results = model.fit(X, y)
+    coef = results.coef_
+    
+    #If we know which columns are collinear (say, col 3 & col 4),
+    #We expect one column to be shrunk drastically compared to the other.
+    
+    col3, col4 = abs(coef[3]), abs(coef[4])
+    threshold = 1.0
+
+    print("Coefficients:", coef)
+    print(f"|coef[3]| = {col3:.4f}, |coef[4]| = {col4:.4f}")
+
+    if (col3 < threshold) or (col4 < threshold):
+        print("Test PASSED: Lasso drove one collinear column near zero.")
+    else:
+        raise AssertionError(
+            f"Test FAILED: expected either coef[3] or coef[4] < {threshold}, "
+            f"but got {col3:.4f} and {col4:.4f}"
+        )
+test_collinear_csv()
+
+# === Test: alpha_zero_OLS===
+def test_alpha_zero_OLS():
+    """
+    Edge case: alpha=0 should give us the ordinary least squares (OLS) solution
+    (no L1 penalty at all). Compare coefficients to np.linalg.lstsq.
+    """
+    # Create a small synthetic dataset
+    np.random.seed(123)
+    n_samples = 20
+    n_features = 5
+
+    # Random X
+    X = np.random.randn(n_samples, n_features)
+    
+    # True coefficients
+    true_coef = np.array([2.0, -1.0, 0.0, 4.0, -3.0])
+    
+    # Generating y with some noise
+    y = X @ true_coef + 0.01 * np.random.randn(n_samples)
+
+    # Fits the Lasso model with alpha=0
+    model = LassoHomotopyModel()
+    model.fit(X, y)
+    lasso_coefs = model.coef_
+    lasso_intercept = model.intercept_
+
+    # Compare with ordinary least squares via np.linalg.lstsq
+    # OLS typically has no separate intercept if we haven't centered data,
+    # so we can compute an "OLS intercept" by appending a column of ones.
+    X_ones = np.column_stack([X, np.ones(n_samples)])
+    ols_solution, _, _, _ = np.linalg.lstsq(X_ones, y, rcond=None)
+    ols_coefs = ols_solution[:-1]   # first part is the slope
+    ols_intercept = ols_solution[-1]  # last part is the intercept
+
+    # Check they're close
+    # Adjust tolerances as appropriate
+    assert np.allclose(lasso_coefs, ols_coefs, atol=1e-2), (
+        "Coefficients from alpha=0 Lasso should match OLS"
+    )
+    assert abs(lasso_intercept - ols_intercept) < 1e-2, (
+        "Intercept from alpha=0 Lasso should match OLS"
+    )
+ 
+
+    # print them for debugging:
+    print("Lasso alpha=0 coefs:", lasso_coefs)
+    print("Lasso alpha=0 intercept:", lasso_intercept)
+    print("OLS coefs:", ols_coefs)
+    print("OLS intercept:", ols_intercept)
+test_alpha_zero_OLS()
+
