@@ -94,7 +94,6 @@ def test_collinear_csv():
             f"Test FAILED: expected either coef[3] or coef[4] < {threshold}, "
             f"but got {col3:.4f} and {col4:.4f}"
         )
-test_collinear_csv()
 
 # === Test: alpha_zero_OLS===
 def test_alpha_zero_OLS():
@@ -145,5 +144,51 @@ def test_alpha_zero_OLS():
     print("Lasso alpha=0 intercept:", lasso_intercept)
     print("OLS coefs:", ols_coefs)
     print("OLS intercept:", ols_intercept)
-test_alpha_zero_OLS()
+
+# ===High tolerance (early stopping) ===
+def test_high_tolerance():
+    X, y = load_data("small_test.csv", label_col="y")
+    model = LassoHomotopyModel(tol=1e-2)
+    model.fit(X, y)
+    y_pred = model.predict(X)
+    print_regression_metrics(y, y_pred, name="High Tolerance Test")
+
+# === Very few iterations (should underfit) ===
+def test_few_iterations():
+    X, y = load_data("small_test.csv", label_col="y")
+    model = LassoHomotopyModel(max_iter=2)
+    model.fit(X, y)
+    y_pred = model.predict(X)
+    print_regression_metrics(y, y_pred, name="Few Iterations Test")
+
+# === Random noise target (should give near-zero coefs) ===
+def test_random_target():
+    X, y = load_data("small_test.csv", label_col="y")
+    np.random.seed(42)
+    y_noise = np.random.randn(len(y))
+    model = LassoHomotopyModel(tol=1e-6)
+    model.fit(X, y_noise)
+    y_pred = model.predict(X)
+    print_regression_metrics(y_noise, y_pred, name="Random Target Test")
+
+# === Normalized input data ===
+def test_normalized_input():
+    X, y = load_data("collinear_data.csv", label_col="target")
+    X = (X - X.mean(axis=0)) / (X.std(axis=0) + 1e-8)
+    model = LassoHomotopyModel()
+    model.fit(X, y)
+    y_pred = model.predict(X)
+    print_regression_metrics(y, y_pred, name="Normalized Input Test")
+
+# === Stricter sparsity check ===
+def test_strict_sparsity():
+    X, y = load_data("collinear_data.csv", label_col="target")
+    model = LassoHomotopyModel(tol=1e-6)
+    model.fit(X, y)
+    y_pred = model.predict(X)
+    print_regression_metrics(y, y_pred, name="Strict Sparsity Test")
+
+    nonzero = np.sum(np.abs(model.coef_) > 1e-4)
+    assert nonzero <= 5, f"Expected sparse solution, got {nonzero} non-zero coefficients"
+
 
